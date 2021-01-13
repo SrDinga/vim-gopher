@@ -29,7 +29,7 @@ endfun
 " Check if the 'go version' output is a version we support.
 fun! gopher#init#version_check(v) abort
   for l:line in split(a:v, '\n')
-    if l:line !~# '^go version \(devel\|go1\.\d\d\(\.\d\d\?\)\?\) .\+/.\+$'
+    if l:line !~# '^go version \(devel\|go1\.\d\d\(\.\d\d\?\)\?\)\(beta\d\)\? .\+/.\+$'
       continue
     endif
 
@@ -57,11 +57,7 @@ fun! gopher#init#config() abort
   let $PATH = s:root . '/tools/bin' . gopher#system#pathsep() . $PATH
 
   " Set defaults.
-  let g:gopher_build_tags     = get(g:, 'gopher_build_tags', [])
-  let g:gopher_build_flags    = get(g:, 'gopher_build_flags', [])
-        \ + (len(g:gopher_build_tags) > 0 ? ['-tags', join(g:gopher_build_tags, ' ')] : [])
   let g:gopher_highlight      = get(g:, 'gopher_highlight', ['string-spell', 'string-fmt'])
-  let g:gopher_debug          = get(g:, 'gopher_debug', [])
   let g:gopher_tag_transform  = get(g:, 'gopher_tag_transform', 'snakecase')
   let g:gopher_tag_default    = get(g:, 'gopher_tag_default', 'json')
   let g:gopher_tag_complete   = get(g:, 'gopher_tag_complete', ['db', 'json', 'json,omitempty', 'yaml'])
@@ -84,11 +80,15 @@ fun! s:map() abort
         \ '_imap_ctrl':   1,
     \ }
   let l:maps = {
-        \ 'error':      'e',
-        \ 'if':         'i',
-        \ 'implement':  'm',
-        \ 'return':     'r',
-        \ 'fillstruct': 'f',
+        \ 'install':      ';',
+        \ 'test-current': 't',
+        \ 'test':         'T',
+        \ 'lint':         'l',
+        \ 'error':        'e',
+        \ 'if':           'i',
+        \ 'implement':    'm',
+        \ 'return':       'r',
+        \ 'fillstruct':   'f',
     \ }
 
   if !exists('g:gopher_map')

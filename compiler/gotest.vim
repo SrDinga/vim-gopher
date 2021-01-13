@@ -8,7 +8,8 @@ let s:save_cpo = &cpoptions
 set cpoptions-=C
 
 " CompilerSet makeprg=go\ test
-let &l:makeprg = 'go test ' . gopher#system#join(get(g:, 'gopher_build_flags', []))
+let &l:makeprg = gopher#str#fold_space(printf('go test %s',
+      \ gopher#system#join(gopher#bufsetting('gopher_build_flags', []))))
 
 let s:goroot = system('go env s:goroot')[:-2]
 
@@ -74,7 +75,7 @@ let &l:errorformat .= ',%A' . s:indent . "%#%\\t%\\+%f:%l: "
 " want when writing a newline into their test output.
 let &l:errorformat .= ',%G' . s:indent . "%#%\\t%\\{2}%m"
 " }}}1
- 
+
 " work with 1.14 'go test -v'
 let &l:errorformat .= ',%A' . s:indent . "%\\+%[%^:]%\\+: %f:%l: %m"
 let &l:errorformat .= ',%A' . s:indent . "%\\+%[%^:]%\\+: %f:%l: "

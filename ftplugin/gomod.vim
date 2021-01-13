@@ -9,3 +9,10 @@ call gopher#init#version()
 setlocal noexpandtab
 
 compiler go
+
+" Autocmd
+augroup gopher.vim
+  au!
+
+  au BufEnter go.mod call gopher#go#set_build_package()
+augroup end

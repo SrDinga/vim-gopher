@@ -373,7 +373,8 @@ fun! gopher#system#join(l, ...) abort
     let l:save = &shellslash
     set noshellslash
 
-    return join(map(copy(a:l), { i, v -> shellescape(l:v, a:0 > 0 ? a:1 : '') }), ' ')
+    let l:l = filter(copy(a:l), {_, v -> v isnot v:null })
+    return join(map(l:l, {_, v -> shellescape(l:v, a:0 > 0 ? a:1 : '') }), ' ')
   finally
     let &shellslash = l:save
   endtry
@@ -425,7 +426,8 @@ fun! s:j_out_cb(ch, msg, ...) abort dict
 endfun
 
 let s:writetick = 0
-augroup gopher.vim
+augroup gopher.vim-cache
+  au!
   au BufWritePost *.go let s:writetick += 1
 augroup end
 let s:cache = {}
@@ -474,6 +476,27 @@ fun! s:setup_debug(msg, ...) abort
   if gopher#has_debug('setup')
     call call('gopher#info', ['setup: ' . a:msg] + a:000)
   endif
+endfun
+
+" Get the closest directory with this name up the tree from the current buffer's
+" path.
+"
+" /a/b/c   c → /a/b/c
+" /a/b/c   a → /a
+" /a/b/c   x → (empty string)
+fun! gopher#system#closest(name) abort
+  let l:dir = expand('%:p:h')
+
+  while 1
+   " TODO: len() check is for Windows; not sure how that's represented.
+    if l:dir is# '/' || len(l:dir) <= 4
+      return ''
+    endif
+    if fnamemodify(l:dir, ':t') is# a:name
+      return l:dir
+    endif
+    let l:dir = fnamemodify(l:dir, ':h')
+  endwhile
 endfun
 
 

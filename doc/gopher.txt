@@ -3,12 +3,21 @@ gopher.txt: plugin for the Go programming language
 ==============================================================================
 INTRODUCTION                                                          *gopher*
 
-gopher.vim is a Vim plugin for the Go programming language.
+              Listen very carefully, I shall say this only once.
 
-This plugin requires Go 1.11 or newer; older versions will not work as the
-internal vendoring uses modules.
+gopher.vim is a Vim plugin for the Go programming language. This is the
+reference documentation; see the README for a quickstart tutorial.
 
-Note: see the README for information to get started; this is only a reference.
+Table of contents~
+
+1. Motions           |gopher-motions|
+2. Text objects      |gopher-text-objects|
+3. Mappings          |gopher-mappings|
+4. Filetypes         |gopher-filetypes|
+5. Compilers         |gopher-compilers|
+6. Commands          |gopher-commands|
+7. Options           |gopher-options|
+
 
 ==============================================================================
 MOTIONS                                                       *gopher-motions*
@@ -16,7 +25,6 @@ MOTIONS                                                       *gopher-motions*
                                                      *gopher-v_]]* *gopher-]]*
 ]]                      Go [count] top-level declarations forward. A top-level
                         declaration is a `func`, `type`, `var`, `const`, or `import`.
-
                         In |ft-gopresent| files it jumps [count] sections
                         forward
 
@@ -24,29 +32,29 @@ MOTIONS                                                       *gopher-motions*
 [[                      Go [count] top-level declarations backwards. In
                         |ft-gopresent| it jumps [count] sections backwards.
 
+
 ==============================================================================
 TEXT OBJECTS                                             *gopher-text-objects*
 
                                                      *gopher-v_af* *gopher-af*
-af                      "a function", select the complete function body and
-                        any preceding documentation comment (if any).
+af                      "a function": complete function body and any preceding
+                        documentation comment.
 
                                                      *gopher-v_if* *gopher-if*
-if                      "inner function", select the contents of a function,
-                        but not the function signature.
+if                      "inner function": function contents without the
+                        signature.
 
                                                      *gopher-v_ac* *gopher-ac*
-ac                      "a comment", select the entire comment, including the
+ac                      "a comment": the entire comment block, including the
                         comment characters themselves.
 
                                                      *gopher-v_ic* *gopher-ic*
-ic                      "inner comment", select the content of the function
-                        but exclude the start and end markers.
+ic                      "inner comment": content of the function but exclude
+                        the start and end markers.
+
 
 ==============================================================================
 MAPPINGS                                                     *gopher-mappings*
-
-Settings for mappings:
 
 *g:gopher_map* = `{}`
         Control how keys are mapped. This is a dict where the following keys
@@ -75,12 +83,16 @@ Settings for mappings:
         is a string. Use a list to map different keys for normal and insert
         mode. Use an empty string to not map a key.
 
-            Map                      Default value ~
-            |(gopher-error)|           e
-            |(gopher-if)|              i
-            |(gopher-implement)|       m
-            |(gopher-return)|          r
-            |(gopher-fillstruct)|      f
+                Map                      Default value ~
+                |(gopher-install)|         ;
+                |(gopher-test-current)|    t
+                |(gopher-test)|            T
+                |(gopher-lint)|            l
+                |(gopher-error)|           e
+                |(gopher-if)|              i
+                |(gopher-implement)|       m
+                |(gopher-return)|          r
+                |(gopher-fillstruct)|      f
 
         Some examples:
 
@@ -100,9 +112,9 @@ Settings for mappings:
             Use `<Leader>i` and `<C-g>i`; >
                 let g:gopher_map = {'_nmap_prefix': '<Leader>', '_imap_prefix': '<C-g>'}
 <
-            A more complex example which 1) doesn't map any defaults, 2) doesn't
-            use a prefix for normal mode mappings, maps to `<F1>` and `<F2>`,
-            and 4) doesn't map anything in insert mode: >
+            A more complex example which 1) doesn't map any defaults, 2)
+            doesn't use a prefix for normal mode mappings, maps to `<F1>` and
+            `<F2>`, and 4) doesn't map anything in insert mode: >
                 let g:gopher_map = {
                                 \ '_default':      0,
                                 \ '_nmap_prefix':  '',
@@ -110,8 +122,50 @@ Settings for mappings:
                                 \ 'return'         ['<F2>', ''],
                                 \ }
 
-The actual mappings; the defaults are shown in the first column with the
-default prefixes.
+*g:gopher_popup* = (undefined)
+        Dict to merge with the options passed to |popup_create|. See
+        |popup_create-arguments|.
+
+        Especially useful to override the position or appearance; for example
+        if you don't want any borders, padding, and a different colour you can
+        use something like: >
+                hi GopherMenu guibg=#cccccc guifg=#000000
+                let g:gopher_popup = {
+                        \ 'border':    [0, 0, 0, 0],
+                        \ 'highlight': 'GopherMenu',
+                        \ 'padding':   [0, 0, 0, 0],
+                        \ 'title':     '',
+                \}
+<
+        This can also be a function returning a dict, mainly so that you can
+        use |winwidth()| and |winheight()| for positioning. For example to
+        place it in the bottom-right of the current window: >
+                let g:Gopher_popup = {->{
+                        \ 'pos':       'botright',
+                        \ 'line':      winheight(0) + 1,
+                        \ 'col':       winwidth(0),
+                        \ }}
+<
+        Note: You MUST spell this with a capital (Vim requirement, |E704|).
+        The uppercase variant will be merged with the lowercase variant if
+        both are defined.
+
+The mappings that gopher.vim defines; the defaults are shown in the first
+column with the default prefixes.
+
+                                                            *(gopher-install)*
+;;  <C-k><C-k>          Set compiler to `go` and |:make|.
+
+                                                               *(gopher-test)*
+;T  <C-k><C-T>          Set compiler to `gotest` and |:make|.
+
+                                                       *(gopher-test-current)*
+;t  <C-k><C-t>          Set compiler to `gotest` and |:make| with
+                        `-run TestCurrentFunction` added if the cursor is
+                        inside a test function.
+
+                                                               *(gopher-lint)*
+;l  <C-k>l              Set compiler to `golint` and |:make|.
 
                                                                  *(gopher-if)*
 ;i  <C-k>i              Toggle between single-line and normal if checks. For
@@ -129,7 +183,7 @@ default prefixes.
 <
                         This works in both directions.
 
-                                                         *(gopher-implement)*
+                                                          *(gopher-implement)*
 ;m  <C-k>m              Implement an interface: generate all methods that
                         don't exist yet for a type.
                         Expects cursor to be on type definition; you'll be
@@ -141,11 +195,12 @@ default prefixes.
 
                                                               *(gopher-error)*
 ;e  <C-k>e              Generate a return statement with the appropriate zero
-                        values for the current function, wrapped in an 'err !=
-                        nil' check.
+                        values for the current function, wrapped in an
+                        `err != nil` check.
 
                                                          *(gopher-fillstruct)*
 ;f  <C-k>f              Fill a struct with all missing entries.
+
 
 ==============================================================================
 FILETYPES                                                   *gopher-filetypes*
@@ -154,12 +209,12 @@ FILETYPES                                                   *gopher-filetypes*
 go~
         The go filetype sets the following settings:
 
-                'equalprg'     `gofmt 2>/dev/null || cat /dev/stdin`
+                'equalprg'      `gofmt 2>/dev/null || cat /dev/stdin`
                                 A simple/native way to format code with gofmt
                                 while ignoring errors. Use ALE or Syntastic
-                                for a more advances experience.
+                                for a more advanced experience.
 
-                                Note: goimports is not used here as it can't
+                                Note: `goimports` is not used here as it can't
                                 operate over a partial file (e.g a line or
                                 function). See the snippet in the README on
                                 how to format with goimports on write.
@@ -188,36 +243,6 @@ go~
         Note: you will need to reload the syntax file with `:set syntax=go`
         for changes to take effect when changing it at runtime.
 
-                                                             *gopher-compiler*
-        Several compilers are supported; you can select one with the
-        |:compiler| command.
-
-                go                      |'makeprg'| defaults to `go install`
-                                        but `go build` or `go run` also work.
-                gotest                  `go test`
-                golint                  `golangci-lint`
-
-        The compilers are compatible with vim-dispatch, but none of the
-        settings below will take effect (so you'll need to use
-        `:Dispatch go build ./cmd/pkg`; the package name won't be added
-        automatically).
-
-                                                    *g:gopher_install_package*
-        Can be set to a package name to install with |:make|; default is to
-        use the current directory. This is especially useful if the main
-        package is a `./cmd/proj` package. You typically want to set this
-        per-project with an |autocmd|:
->
-            autocmd BufReadPre /home/martin/code/proj/*.go
-                        \ let g:gopher_install_package = 'example.com/proj/cmd/proj'
-<
-        This ensures that the `example.com/proj/cmd/proj` package is installed
-        with |:make| regardless of the current directory or file you have
-        open. This is only used by the go |compiler|, not gotest or golint.
-
-        Note: run |:e| to reload after changing this during runtime.
-
-
                                                                     *ft-gomod*
 gomod~
                         go.mod file; there are no options.
@@ -236,6 +261,98 @@ gotext gohtml~
                         to files ending with the `.gotext` and `.gohtml`.
                         gohtml loads the standard html syntax highlighting,
                         but they are otherwise identical.
+
+
+==============================================================================
+COMPILERS                                                   *gopher-compilers*
+
+        Several compilers are supported; you can select one with the
+        |:compiler| command.
+
+                go              `go install`
+                gotest          `go test`
+                golint          `golangci-lint`
+
+        The compilers are compatible with vim-dispatch, but none of the
+        settings below will take effect (so you'll need to use
+        `:Dispatch go build ./cmd/pkg`; the package name won't be added
+        automatically).
+
+                                                          *gopher-compiler-go*
+go ~
+
+
+        gopher.vim tries to be a bit smart about what to set `makeprg` to:
+
+        go
+
+        gopher_build_command
+
+        gopher_build_flags
+
+        gopher_build_tags
+
+        gopher_build_package
+
+
+
+        if a `./cmd/<module-name>` package exists then it will compile that
+        instead of the current package, and build tags from the current file
+        are automatically added. There's a bunch of options to tweak the
+        behaviour: see `:help gopher-compilers` for detailed documentation.
+
+
+                                                    *g:gopher_build_command*
+                                                    *b:gopher_build_command*
+        Command to build Go code.
+
+        Default: `install`; set to `build` if you want to run `go build`
+        instead of `go install`
+
+                                                    *g:gopher_build_package*
+                                                    *b:gopher_build_package*
+        Can be set to a package name to install with |:make|; default is to set
+        the buffer-local setting to `[module]/cmd/[module-name]` if the
+        package exists.
+
+        You typically want to set this per-project with an |autocmd|:
+>
+            autocmd BufReadPre /home/martin/code/proj/*.go
+                        \ let b:gopher_build_package = 'example.com/proj/cmd/xxx'
+<
+        This ensures that the `example.com/proj/cmd/xxx` package is installed
+        with |:make| regardless of the current directory or file you have
+        open. This is only used by the go |compiler|, not gotest or golint.
+
+        Set to `-1` to disable the automatic `cmd/[module-name]` detection.
+
+        Note: reset the compiler with `:compiler go` (or just run |:e|) to
+              reload after changing this during runtime.
+
+                                                         *g:gopher_build_tags*
+                                                         *b:gopher_build_tags*
+        List of build tags added to all commands that support it. The
+        buffer-local variable is automatically set to the build tags in the
+        file.
+
+        Note: the buffer-local variable overrides the global; it's not merged.
+
+                                                        *g:gopher_build_flags*
+                                                        *b:gopher_build_flags*
+        List of flags to add to all `go` commands.
+
+        Default: `['-tags'] + g:gopher_build_tags`
+        b: undefined
+
+                                                       *gopher-compiler-gotest*
+gotest~
+
+TODO: document
+
+                                                       *gopher-compiler-golint*
+golint~
+
+TODO: document
 
 ==============================================================================
 COMMANDS                                                     *gopher-commands*
@@ -363,6 +480,7 @@ COMMANDS                                                     *gopher-commands*
                               |g:gopher_guru_scope|.
 
         *g:gopher_guru_scope* = `gopher#go#package()`
+        *b:gopher_guru_scope* = (undefined)
                 Limit the analysis to these package, comma-separated list.
 
                 Some guru commands are slow and expensive, so for reasons of
@@ -477,17 +595,27 @@ COMMANDS                                                     *gopher-commands*
                         pascalcase       fooBar -> FooBar
                         keep             No transformation; FooBar -> FooBar
 
+
 ==============================================================================
 OPTIONS                                                       *gopher-options*
 
-General options or options that affect many commands; options specific for
-just a command are documented in the command.
+Options documented elsewhere:
 
-*g:gopher_build_tags* = `[]`
-        List of build tags added to all commands that support it.
+        |g:gopher_popup|               Control default mappings.
+        |g:gopher_map|
 
-*g:gopher_build_flags* = `['-tags'] + g:gopher_build_tags`
-        List of flags to add to all `go` commands.
+        |g:gopher_highlight|           Control syntax highlighting.
+
+        |g:gopher_build_flags|         Flags to go install/test/build.
+        |g:gopher_build_tags|
+        |g:gopher_build_command|
+        |g:gopher_build_package|
+
+        |g:gopher_gorename_flags|      Flags to various external tools.
+        |g:gopher_guru_scope|
+        |g:gopher_tag_complete|
+        |g:gopher_tag_default|
+        |g:gopher_tag_transform|
 
 *g:gopher_debug* = `[]`
         List of debugging options:
@@ -503,36 +631,8 @@ just a command are documented in the command.
         unsets b:did_ftplugin and b:current_syntax, and removes vim-go from
         'runtimepath'.
 
-        This is only recommended for testing/experimenting. This will break if
-        vim-go adds new commands or autocmds.
-
-*g:gopher_popup* = (undefined)
-        Dict to merge with the options passed to |popup_create|. See
-        |popup_create-arguments|.
-
-        Especially useful to override the position or appearance; for example
-        if you don't want any borders, padding, and a different colour you can
-        use something like: >
-                hi GopherMenu guibg=#cccccc guifg=#000000
-                let g:gopher_popup = {
-                        \ 'border':    [0, 0, 0, 0],
-                        \ 'highlight': 'GopherMenu',
-                        \ 'padding':   [0, 0, 0, 0],
-                        \ 'title':     '',
-                \}
-<
-        This can also be a function returning a dict, mainly so that you can
-        use |winwidth()| and |winheight()| for positioning. For example to
-        place it in the bottom-right of the current window: >
-                let g:Gopher_popup = {->{
-                        \ 'pos':       'botright',
-                        \ 'line':      winheight(0) + 1,
-                        \ 'col':       winwidth(0),
-                        \ }}
-<
-        Note: You MUST spell this with a capital (Vim requirement, |E704|).
-        The uppercase variant will be merged with the lowercase variant if
-        both are defined.
+        This is only recommended for testing/experimenting; and not guaranteed
+        to be 100% reliable.
 
 
 vim:tw=78:ts=8:sts=8:sw=8:ft=help:norl:expandtab

@@ -254,17 +254,24 @@ fun! gopher#frob#fillstruct() abort
 endfun
 
 let s:popup_items = [
-      \ ['error',      'Add return with if err != nil'],
-      \ ['if',         'Toggle if style'],
-      \ ['implement',  'Add interface methods'],
-      \ ['return',     'Add return'],
-      \ ['fillstruct', 'Fill struct with keyed fields'],
+      \ ['install',      'Install current package or ./cmd/<modname>'],
+      \ ['test-current', 'Test current function'],
+      \ ['test',         'Test current package'],
+      \ ['lint',         'Lint current package'],
+      \ ['error',        'Add return with if err != nil'],
+      \ ['if',           'Toggle if style'],
+      \ ['implement',    'Add interface methods'],
+      \ ['return',       'Add return'],
+      \ ['fillstruct',   'Fill struct with keyed fields'],
   \ ]
 
 " key -> action mapping (reverse of g:gopher_map).
 let s:map = {}
 
 " Show a popup menu with mappings to choose from.
+"
+" TODO: move out of frob.vim to popup.vim, since it's more than just frob
+" commands now.
 fun! gopher#frob#popup() abort
   " Makes s:map and desciption list.
   let l:items = []
@@ -345,6 +352,14 @@ fun! s:run_cmd(id, cmd, ...) abort
     call gopher#frob#ret(1)
   elseif a:cmd is# 'fillstruct'
     call gopher#frob#fillstruct()
+  elseif a:cmd is# 'install'
+    call gopher#go#run_install()
+  elseif a:cmd is# 'test'
+    call gopher#go#run_test()
+  elseif a:cmd is# 'test-current'
+    call gopher#go#run_test_current()
+  elseif a:cmd is# 'lint'
+    call gopher#go#run_lint()
   elseif a:cmd is# 'implement'
     if a:0 is 0
       let l:in = [input('interface? ', '', 'customlist,gopher#frob#complete')]

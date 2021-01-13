@@ -14,7 +14,8 @@ Some of the biggest changes/improvements from vim-go (not a comprehensive list):
 
 - :`GoInstall`, `:GoTest`, etc. are now implemented as a compiler. This is
   essentially the same in most respects, except that it doesn't re-implement
-  quite a bit of native Vim features.
+  quite a bit of native Vim features. It's also a bit smarter about which
+  package to build and passing build tags.
 
 - `:GoImpl` is now `:GoFrob implements`. All code change commands are now behind
   one `:GoFrob` command. They're also mapped to `;[letter]` in normal mode, and
@@ -116,7 +117,7 @@ vim-go on left, gopher.vim on right.
     :GoTestCompile                :make -c or :make -c -o/dev/null
     :GoTestFunc                   :make -run ..
 
-    :GoBuildTags                  let g:gopher_build_tags = [..]
+    :GoBuildTags                  let g:gopher_build_tags = [..], or b:gopher_build_tags
 
 ### Linting
 
